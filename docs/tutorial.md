@@ -50,7 +50,7 @@ import autograd.numpy as np
 from autograd import grad
 
 def sigmoid(x):
-    return 0.5*(np.tanh(x) + 1)
+    return 0.5 * (np.tanh(x / 2.) + 1)
 
 def logistic_predictions(weights, inputs):
     # Outputs probability of a label being true according to logistic model.
@@ -74,11 +74,11 @@ training_gradient_fun = grad(training_loss)
 
 # Optimize weights using gradient descent.
 weights = np.array([0.0, 0.0, 0.0])
-print "Initial loss:", training_loss(weights)
-for i in xrange(100):
+print("Initial loss:", training_loss(weights))
+for i in range(100):
     weights -= training_gradient_fun(weights) * 0.01
 
-print  "Trained loss:", training_loss(weights)
+print("Trained loss:", training_loss(weights))
 ```
 
 Python syntax is pretty good for specifying probabilistic models.  The biggest

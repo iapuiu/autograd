@@ -1,10 +1,5 @@
 # Autograd  [![Test status](https://travis-ci.org/HIPS/autograd.svg?branch=master)](https://travis-ci.org/HIPS/autograd) [![asv](http://img.shields.io/badge/benchmarked%20by-asv-green.svg?style=flat)](#)
 
-_**Recent update notice**: Autograd v1.2 changed the interface for defining
-custom vector-Jacobian products (VJPs). Luckily the change only affects users
-writing custom VJPs, and should only require minor updates to the custom VJP
-code. See the [Autograd v1.2 update guide](docs/updateguide.md)._
-
 Autograd can automatically differentiate native Python and Numpy code. It can
 handle a large subset of Python's features, including loops, ifs, recursion and
 closures, and it can even take derivatives of derivatives of derivatives. It
@@ -79,8 +74,10 @@ Just run `pip install autograd`
 ## Authors
 
 Autograd was written by [Dougal Maclaurin](https://dougalmaclaurin.com),
-[David Duvenaud](https://www.cs.toronto.edu/~duvenaud/)
-and [Matt Johnson](http://people.csail.mit.edu/mattjj/),
+[David Duvenaud](https://www.cs.toronto.edu/~duvenaud/),
+[Matt Johnson](http://people.csail.mit.edu/mattjj/),
+[Jamie Townsend](https://github.com/j-towns)
+and many other contributors,
 and we're actively developing it.
 Please feel free to submit any bugs or feature requests.
 We'd also love to hear about your experiences with autograd in general.

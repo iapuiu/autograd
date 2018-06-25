@@ -6,6 +6,7 @@ from inspect import getargspec
 import warnings
 
 from .wrap_util import unary_to_nary
+from .builtins import tuple as atuple
 from .core import make_vjp as _make_vjp, make_jvp as _make_jvp
 from .extend import primitive, defvjp_argnum, vspace
 
@@ -24,7 +25,7 @@ def grad(fun, x):
     vjp, ans = _make_vjp(fun, x)
     if not vspace(ans).size == 1:
         raise TypeError("Grad only applies to real scalar-output functions. "
-                        "Try jacobian or elementwise_grad.")
+                        "Try jacobian, elementwise_grad or holomorphic_grad.")
     return vjp(vspace(ans).ones())
 
 @unary_to_nary
@@ -127,20 +128,18 @@ def value_and_grad(fun, x):
     """Returns a function that returns both value and gradient. Suitable for use
     in scipy.optimize"""
     vjp, ans = _make_vjp(fun, x)
+    if not vspace(ans).size == 1:
+        raise TypeError("value_and_grad only applies to real scalar-output "
+                        "functions. Try jacobian, elementwise_grad or "
+                        "holomorphic_grad.")
     return ans, vjp(vspace(ans).ones())
 
-def grad_and_aux(fun, argnum=0):
+@unary_to_nary
+def grad_and_aux(fun, x):
     """Builds a function that returns the gradient of the first output and the
     (unmodified) second output of a function that returns two outputs."""
-    def grad_and_aux_fun(*args, **kwargs):
-        saved = lambda: None
-        def return_val_save_aux(*args, **kwargs):
-            val, saved.aux = fun(*args, **kwargs)
-            return val
-        gradval = grad(return_val_save_aux, argnum)(*args, **kwargs)
-        return gradval, saved.aux
-
-    return grad_and_aux_fun
+    vjp, (ans, aux) = _make_vjp(lambda x: atuple(fun(x)), x)
+    return vjp((vspace(ans).ones(), vspace(aux).zeros())), aux
 
 def multigrad_dict(fun):
     "Takes gradients wrt all arguments simultaneously,"

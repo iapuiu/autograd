@@ -17,11 +17,12 @@ else:
     import autograd.scipy.stats.multivariate_normal as mvn
     import autograd.scipy.special as special
     import autograd.scipy.linalg as spla
+    import autograd.scipy.integrate as integrate
     from autograd import grad
     from scipy.signal import convolve as sp_convolve
 
     from autograd.test_util import combo_check, check_grads
-    from numpy_utils import  unary_ufunc_check
+    from numpy_utils import unary_ufunc_check
 
     npr.seed(1)
     R = npr.randn
@@ -110,16 +111,16 @@ else:
     def test_dirichlet_logpdf_alpha(): combo_check(stats.dirichlet.logpdf,      [1])([x], [alpha])
 
     ### Misc ###
-    def test_logsumexp1(): combo_check(autograd.scipy.misc.logsumexp, [0])([1.1, R(4), R(3,4)],                axis=[None, 0],    keepdims=[True, False])
-    def test_logsumexp2(): combo_check(autograd.scipy.misc.logsumexp, [0])([R(3,4), R(4,5,6), R(1,5)],         axis=[None, 0, 1], keepdims=[True, False])
-    def test_logsumexp3(): combo_check(autograd.scipy.misc.logsumexp, [0])([R(4)], b = [np.exp(R(4))],         axis=[None, 0],    keepdims=[True, False])
-    def test_logsumexp4(): combo_check(autograd.scipy.misc.logsumexp, [0])([R(3,4),], b = [np.exp(R(3,4))],    axis=[None, 0, 1], keepdims=[True, False])
-    def test_logsumexp5(): combo_check(autograd.scipy.misc.logsumexp, [0])([R(2,3,4)], b = [np.exp(R(2,3,4))], axis=[None, 0, 1], keepdims=[True, False])
+    def test_logsumexp1(): combo_check(autograd.scipy.misc.logsumexp, [0], modes=['fwd', 'rev'])([1.1, R(4), R(3,4)],                axis=[None, 0],    keepdims=[True, False])
+    def test_logsumexp2(): combo_check(autograd.scipy.misc.logsumexp, [0], modes=['fwd', 'rev'])([R(3,4), R(4,5,6), R(1,5)],         axis=[None, 0, 1], keepdims=[True, False])
+    def test_logsumexp3(): combo_check(autograd.scipy.misc.logsumexp, [0], modes=['fwd', 'rev'])([R(4)], b = [np.exp(R(4))],         axis=[None, 0],    keepdims=[True, False])
+    def test_logsumexp4(): combo_check(autograd.scipy.misc.logsumexp, [0], modes=['fwd', 'rev'])([R(3,4),], b = [np.exp(R(3,4))],    axis=[None, 0, 1], keepdims=[True, False])
+    def test_logsumexp5(): combo_check(autograd.scipy.misc.logsumexp, [0], modes=['fwd', 'rev'])([R(2,3,4)], b = [np.exp(R(2,3,4))], axis=[None, 0, 1], keepdims=[True, False])
     def test_logsumexp6():
         x = npr.randn(1,5)
         def f(a): return autograd.scipy.misc.logsumexp(a, axis=1, keepdims=True)
-        check_grads(f)(x)
-        check_grads(lambda a: grad(f)(a))(x)
+        check_grads(f, modes=['fwd', 'rev'])(x)
+        check_grads(lambda a: grad(f)(a), modes=['fwd', 'rev'])(x)
 
     ### Signal ###
     def test_convolve_generalization():
@@ -197,3 +198,10 @@ else:
 
     def test_logit(): unary_ufunc_check(special.logit, lims=[ 0.10, 0.90], test_complex=False)
     def test_expit(): unary_ufunc_check(special.expit, lims=[-4.05, 4.95], test_complex=False)
+
+    ### ODE integrator ###
+    def func(y, t, arg1, arg2):
+        return -np.sqrt(t) - y + arg1 - np.mean((y + arg2)**2)
+    def test_odeint():
+        combo_check(integrate.odeint, [1,2,3])([func], [R(3)], [np.linspace(0.1, 0.2, 4)],
+                                                 [(R(3), R(3))])
