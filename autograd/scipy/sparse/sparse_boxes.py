@@ -2,6 +2,7 @@ from __future__ import absolute_import
 import scipy.sparse as sp
 from autograd.extend import Box, primitive
 from autograd.numpy import numpy_wrapper as anp
+import numpy as np
 
 Box.__array_priority__ = 90.0
 
