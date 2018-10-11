@@ -18,7 +18,7 @@ def T(x): return anp.swapaxes(x, -1, -2)
 # fancy dot product?
 _dot = partial(anp.einsum, '...ij,...jk->...ik')
 
-D = 200*200
+D = 10
 
 # matrix to solve (Ax = b)
 A = 10.0 * np.eye(D) + npr.random((D, D))
@@ -130,4 +130,31 @@ I get this output
 """
 
 
+## Here I construct an objective function of a np array with as the diagonal of A_total matrix 'eps' 
+def J(eps, b):   
+    row = np.array([d for d in range(D)])
+    col = np.array([d for d in range(D)]) 
+    eps_sp = csc_matrix((eps, (row, col)), shape=(D,D))
+    A_total = A0 + eps_sp  
+    x = sparsesolve(A_total, b)
+    return np.sum(np.abs(x))
+
+dJdeps = grad(J, 0)
+
+eps = np.array(npr.random((D,)))
+
+J_orig = J(eps, b)
+
+grad_numerical = np.zeros((D,))
+for d in range(D):
+    eps_new = deepcopy(eps)
+    eps_new[d] += epsilon
+    J_new = J(eps_new, b)
+    grad_numerical[d] = (J_new - J_orig) / epsilon
+
+grad_analytical = dJdeps(eps, b)
+
+print('')
+for d in range(min(D, 10)):
+    print('d = {}:   autograd = {}, \tnumerical = {}'.format(d, grad_analytical[d, d], grad_numerical[d]))
 
